@@ -115,6 +115,9 @@ pub fn network_config_from_toml(config: &TomlConfig) -> NetworkConfig {
     if let Some(http_proxy) = config.get_http_proxy() {
         result.http_proxy = Some(http_proxy.to_string());
     }
+    if let Some(http_proxy_portal) = config.get_http_proxy_portal() {
+        result.http_proxy_portal = Some(http_proxy_portal.to_string());
+    }
     let mapped_listeners = config.get_mapped_listeners();
     if !mapped_listeners.is_empty() {
         result.mapped_listeners = mapped_listeners.iter().map(ToString::to_string).collect();

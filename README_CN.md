@@ -42,6 +42,32 @@
 - 🔧 **Web 管理**：通过 Web 界面轻松配置和监控
 - 🛠️ **零配置**：静态链接的可执行文件，简单部署
 
+## Fork 额外功能（本仓库）
+
+本 Fork 在 EasyTier 基础上增加了**手机端透明 HTTP/HTTPS 代理**能力，主要用于 Android。
+
+### 手机端透明 HTTP/HTTPS 代理（Android）
+
+- 在手机侧核心里起一个本地 HTTP 代理（默认监听 `127.0.0.1:7890`）。
+- Android VPN 通过 `setHttpProxy` 把系统的 80/443 流量引流到该本地代理。
+- 本地代理把每个连接经 **VPN 数据面（smoltcp 隧道）** 转发到配置的上游 HTTP 代理（如 `10.144.144.3:8080`），由上游代理真正出网。
+- 该功能与 exit node / 子网代理**解耦**，只覆盖被 `setHttpProxy` 引流的 80/443 流量。
+
+### 配置
+
+在 TOML 配置的 `[services.proxy]` 下新增：
+
+- `http_proxy`：上游 HTTP 代理地址（`SocketAddr`），例如 `10.144.144.3:8080`。
+- `http_proxy_portal`：本地监听地址，缺省为 `127.0.0.1:7890`。
+
+### 适用场景
+
+手机只接入 VPN 内网、没有默认路由，但需要把 App 的 HTTP/HTTPS 流量经指定的上游代理出网时使用。
+
+### 构建
+
+见 [build.sh](/build.sh)：`./build.sh` 一键编译并安装 `easytier-arm64.apk` 到已连接的 adb 设备。
+
 ## 快速开始
 
 ### 📥 安装

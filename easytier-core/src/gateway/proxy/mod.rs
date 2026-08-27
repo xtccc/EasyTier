@@ -22,10 +22,8 @@ pub(crate) mod tcp_proxy_engine;
 pub(crate) mod tcp_proxy_service;
 #[cfg(feature = "proxy-packet")]
 pub(crate) mod tcp_socket_connector;
-#[cfg(feature = "proxy-packet")]
-pub(crate) mod http_proxy_connector;
-#[cfg(feature = "proxy-packet")]
-pub(crate) mod routing_connector;
+#[cfg(feature = "proxy-smoltcp-stack")]
+pub(crate) mod http_proxy_portal;
 #[cfg(feature = "proxy-packet")]
 pub(crate) mod udp_proxy_engine;
 #[cfg(feature = "proxy-packet")]

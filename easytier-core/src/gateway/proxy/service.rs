@@ -26,7 +26,6 @@ use crate::{
 use super::{
     cidr_table::ProxyCidrTable,
     icmp_proxy_service::IcmpProxyService,
-    routing_connector::RoutingTcpProxyConnector,
     tcp_proxy_engine::TcpNatEntrySnapshot,
     tcp_proxy_service::TcpProxyService,
     tcp_socket_connector::TcpSocketProxyConnector,
@@ -255,7 +254,7 @@ where
     }
 }
 
-type CoreTcpProxy<H> = TcpProxyService<CoreProxyRuntime<H>, H, RoutingTcpProxyConnector<H>>;
+type CoreTcpProxy<H> = TcpProxyService<CoreProxyRuntime<H>, H, TcpSocketProxyConnector<H>>;
 type CoreUdpProxyRuntime<H> = UdpSocketProxyRuntime<H, CoreProxyRuntime<H>>;
 type CoreUdpProxy<H> = UdpProxyService<CoreUdpProxyRuntime<H>>;
 type CoreIcmpProxy<H> = IcmpProxyService<CoreIcmpProxyRuntime<H>>;
@@ -304,12 +303,10 @@ where
             config.clone(),
             "TCP",
         );
-        let http_proxy = config.snapshot().services.proxy.http_proxy;
-        let tcp_connector = Arc::new(RoutingTcpProxyConnector::new(
+        let tcp_connector = Arc::new(
             TcpSocketProxyConnector::new(host.clone())
                 .with_socket_context(tcp_socket_context.clone()),
-            http_proxy,
-        ));
+        );
         let tcp = TcpProxyService::new_with_socket_context(
             peer_manager.clone(),
             runtime.clone(),

@@ -321,6 +321,14 @@ impl NetworkConfigExt for NetworkConfig {
             }
         }
 
+        if let Some(ref http_proxy_portal) = self.http_proxy_portal {
+            if !http_proxy_portal.is_empty() {
+                if let Ok(addr) = http_proxy_portal.parse::<std::net::SocketAddr>() {
+                    cfg.set_http_proxy_portal(Some(addr));
+                }
+            }
+        }
+
         if !self.mapped_listeners.is_empty() {
             let mapped_listeners = parse_mapped_listener_urls(&self.mapped_listeners)?;
             cfg.set_mapped_listeners(Some(mapped_listeners));
@@ -642,6 +650,10 @@ impl NetworkConfigExt for NetworkConfig {
 
         if let Some(http_proxy) = config.get_http_proxy() {
             result.http_proxy = Some(http_proxy.to_string());
+        }
+
+        if let Some(http_proxy_portal) = config.get_http_proxy_portal() {
+            result.http_proxy_portal = Some(http_proxy_portal.to_string());
         }
 
         let mapped_listeners = config.get_mapped_listeners();

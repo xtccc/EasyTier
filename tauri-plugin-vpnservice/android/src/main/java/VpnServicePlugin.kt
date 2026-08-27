@@ -25,6 +25,7 @@ class StartVpnArgs {
     var dns: String? = null
     var disallowedApplications: Array<String> = emptyArray()
     var mtu: Int? = null
+    var httpProxyPort: Int? = null
 }
 
 @TauriPlugin
@@ -89,6 +90,7 @@ class VpnServicePlugin(private val activity: Activity) : Plugin(activity) {
                 intent.putExtra(TauriVpnService.DNS, args.dns)
                 intent.putExtra(TauriVpnService.DISALLOWED_APPLICATIONS, args.disallowedApplications)
                 intent.putExtra(TauriVpnService.MTU, args.mtu)
+                intent.putExtra(TauriVpnService.HTTP_PROXY_PORT, args.httpProxyPort)
 
                 activity.startService(intent)
             }

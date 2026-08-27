@@ -42,6 +42,32 @@
 - 🔧 **Web Management**: Easy configuration and monitoring through web interface  
 - 🛠️ **Zero Config**: Simple deployment with statically linked executables  
 
+## Fork Extra Features (this repository)
+
+This fork adds an **on-device transparent HTTP/HTTPS proxy** on top of EasyTier, mainly for Android.
+
+### On-device transparent HTTP/HTTPS proxy (Android)
+
+- The phone-side core starts a local HTTP proxy (default `127.0.0.1:7890`).
+- The Android VPN uses `setHttpProxy` to redirect the system's 80/443 traffic into this local proxy.
+- The local proxy forwards every connection through the **VPN data plane (smoltcp tunnel)** to the configured upstream HTTP proxy (e.g. `10.144.144.3:8080`), which performs the real egress.
+- This feature is **decoupled** from the exit node / subnet proxy; it only covers the 80/443 traffic steered by `setHttpProxy`.
+
+### Configuration
+
+Under `[services.proxy]` in the TOML config:
+
+- `http_proxy`: upstream HTTP proxy address (`SocketAddr`), e.g. `10.144.144.3:8080`.
+- `http_proxy_portal`: local listen address, defaults to `127.0.0.1:7890`.
+
+### Use case
+
+When the phone only joins the VPN overlay (no default route) but its apps' HTTP/HTTPS traffic must egress through a designated upstream proxy.
+
+### Build
+
+See [build.sh](/build.sh): `./build.sh` builds and installs `easytier-arm64.apk` to the connected adb device in one step.
+
 ## Quick Start
 
 ### 📥 Installation

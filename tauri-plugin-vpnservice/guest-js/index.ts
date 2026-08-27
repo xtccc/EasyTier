@@ -19,6 +19,7 @@ export interface StartVpnRequest {
   dns?: string;
   disallowedApplications?: string[];
   mtu?: number;
+  httpProxyPort?: number;
 }
 
 export interface VpnStatusResponse {

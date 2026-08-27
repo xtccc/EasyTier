@@ -177,18 +177,26 @@ async function doStopVpn(force = false) {
   resetVpnConfigStatus()
 }
 
-async function doStartVpn(instanceId: string, ipv4Addr: string, cidr: number, routes: string[], dns?: string) {
+async function doStartVpn(
+  instanceId: string,
+  ipv4Addr: string,
+  cidr: number,
+  routes: string[],
+  dns: string | undefined,
+  httpProxyPort = 0,
+) {
   if (curVpnStatus.running) {
     return
   }
 
-  console.log('start vpn service', ipv4Addr, cidr, routes, dns)
+  console.log('start vpn service', ipv4Addr, cidr, routes, dns, 'httpProxyPort', httpProxyPort)
   const request = {
     ipv4Addr: `${ipv4Addr}/${cidr}`,
     routes,
     dns,
     disallowedApplications: ['com.kkrainbow.easytier'],
     mtu: 1300,
+    httpProxyPort,
   }
 
   let start_ret = await start_vpn(request)
@@ -362,6 +370,19 @@ async function reconcileNetworkInstance(instanceId: string, generation: number) 
 
   const dns = config.enable_magic_dns ? '100.100.100.101' : undefined
 
+  let httpProxyPort = 0
+  if (config.http_proxy?.length) {
+    const portal = config.http_proxy_portal
+    let parsed = NaN
+    if (portal?.length) {
+      const idx = portal.lastIndexOf(':')
+      if (idx >= 0) {
+        parsed = Number.parseInt(portal.slice(idx + 1), 10)
+      }
+    }
+    httpProxyPort = Number.isFinite(parsed) && parsed! > 0 ? parsed! : 7890
+  }
+
   const ipChanged = virtual_ip !== curVpnStatus.ipv4Addr
   const cidrChanged = network_length !== curVpnStatus.ipv4Cidr
   const routesChanged = JSON.stringify(routes) !== JSON.stringify(curVpnStatus.routes)
@@ -384,7 +405,7 @@ async function reconcileNetworkInstance(instanceId: string, generation: number) 
       if (!isCurrentVpnReconcile(instanceId, generation))
         return
 
-      await doStartVpn(instanceId, virtual_ip, network_length, routes, dns)
+      await doStartVpn(instanceId, virtual_ip, network_length, routes, dns, httpProxyPort)
       if (!isCurrentVpnReconcile(instanceId, generation) && activeVpnInstanceId === instanceId) {
         await doStopVpn()
       }

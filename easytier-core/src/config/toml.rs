@@ -242,6 +242,9 @@ pub trait ConfigLoader: Send + Sync {
     fn get_http_proxy(&self) -> Option<SocketAddr>;
     fn set_http_proxy(&self, addr: Option<SocketAddr>);
 
+    fn get_http_proxy_portal(&self) -> Option<SocketAddr>;
+    fn set_http_proxy_portal(&self, addr: Option<SocketAddr>);
+
     fn get_port_forwards(&self) -> Vec<PortForwardConfig>;
     fn set_port_forwards(&self, forwards: Vec<PortForwardConfig>);
 
@@ -542,6 +545,8 @@ struct Config {
     socks5_proxy: Option<url::Url>,
 
     http_proxy: Option<SocketAddr>,
+
+    http_proxy_portal: Option<SocketAddr>,
 
     port_forward: Option<Vec<PortForwardConfig>>,
 
@@ -1059,6 +1064,14 @@ impl ConfigLoader for TomlConfig {
 
     fn set_http_proxy(&self, addr: Option<SocketAddr>) {
         self.config.lock().unwrap().http_proxy = addr;
+    }
+
+    fn get_http_proxy_portal(&self) -> Option<SocketAddr> {
+        self.config.lock().unwrap().http_proxy_portal
+    }
+
+    fn set_http_proxy_portal(&self, addr: Option<SocketAddr>) {
+        self.config.lock().unwrap().http_proxy_portal = addr;
     }
 
     fn get_port_forwards(&self) -> Vec<PortForwardConfig> {

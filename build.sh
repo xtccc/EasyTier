@@ -53,12 +53,16 @@ command -v pnpm  >/dev/null 2>&1 || { echo "[错误] 未找到 pnpm,请先安装
 rustup target add aarch64-linux-android >/dev/null 2>&1 || true
 
 # ---------------------------------------------------------------------------
-# 4. 补丁: proto 字段号冲突 (peers 与 http_proxy 都用了 68)
+# 4. 补丁: proto 字段号冲突 (peers 固定为 68 以兼容上游, http_proxy 不得占用 68)
+#    若 http_proxy 仍占用 68,则改到 72; 绝不改动 peers 的字段号。
 # ---------------------------------------------------------------------------
 PROTO_FILE="$REPO_ROOT/easytier-proto/proto/api_manage.proto"
+if grep -q "optional string http_proxy = 68;" "$PROTO_FILE" 2>/dev/null; then
+  echo "[补丁] 修复 api_manage.proto 字段号冲突 (http_proxy 68 -> 72)"
+  sed -i 's/optional string http_proxy = 68;/optional string http_proxy = 72;/' "$PROTO_FILE"
+fi
 if grep -q "repeated NetworkPeerConfig peers = 68;" "$PROTO_FILE" 2>/dev/null; then
-  echo "[补丁] 修复 api_manage.proto 字段号冲突 (peers 68 -> 70)"
-  sed -i 's/repeated NetworkPeerConfig peers = 68;/repeated NetworkPeerConfig peers = 70;/' "$PROTO_FILE"
+  echo "[补丁] 确认 peers 字段号保持 68 (兼容上游)"
 fi
 
 # ---------------------------------------------------------------------------

@@ -2,6 +2,7 @@ package com.plugin.vpnservice
 
 import android.content.Intent
 import android.net.VpnService
+import android.net.ProxyInfo
 import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.os.Bundle
@@ -21,8 +22,9 @@ class TauriVpnService : VpnService() {
         const val IPV4_ADDR = "IPV4_ADDR"
         const val ROUTES = "ROUTES"
         const val DNS = "DNS"
-        const val DISALLOWED_APPLICATIONS = "DISALLOWED_APPLICATIONS"
-        const val MTU = "MTU"
+    const val DISALLOWED_APPLICATIONS = "DISALLOWED_APPLICATIONS"
+    const val MTU = "MTU"
+    const val HTTP_PROXY_PORT = "HTTP_PROXY_PORT"
     }
 
     private lateinit var vpnInterface: ParcelFileDescriptor
@@ -88,6 +90,7 @@ class TauriVpnService : VpnService() {
         var dns: String? = args?.getString(DNS)
         var routes = args?.getStringArray(ROUTES) ?: emptyArray()
         var disallowedApplications = args?.getStringArray(DISALLOWED_APPLICATIONS) ?: emptyArray()
+        var httpProxyPort = args?.getInt(HTTP_PROXY_PORT, 0) ?: 0
 
         println("vpn create vpn interface. mtu: $mtu, ipv4Addr: $ipv4Addr, dns:" +
             "$dns, routes: ${java.util.Arrays.toString(routes)}," +
@@ -114,6 +117,11 @@ class TauriVpnService : VpnService() {
         return builder.also {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 it.setMetered(false)
+                if (httpProxyPort > 0) {
+                    it.setHttpProxy(
+                        ProxyInfo.buildDirectProxy("127.0.0.1", httpProxyPort)
+                    )
+                }
             }
         }
         .establish()

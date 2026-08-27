@@ -666,6 +666,7 @@ where
             direct_options.udp_bind.context.clone(),
             icmp_proxy_host,
         );
+
         #[cfg(feature = "wrapped-transport")]
         let wrapped_transport = {
             let WrappedTransportEngines { kcp, quic } = wrapped_transports;
@@ -691,6 +692,37 @@ where
         );
         #[cfg(feature = "proxy-smoltcp-stack")]
         let data_plane_session = DataPlaneSession::new(&data_plane_runtime);
+
+        // On-device HTTP proxy portal: when an upstream HTTP proxy is
+        // configured, start a local listener that tunnels the client's
+        // 80/443 traffic through it. The upstream connection is opened via the
+        // smoltcp data plane so it can reach VPN-internal proxy addresses.
+        // Independent of the exit-node proxy.
+        #[cfg(feature = "proxy-smoltcp-stack")]
+        {
+            let proxy_cfg = runtime_config.snapshot().services.proxy;
+            if let Some(upstream) = proxy_cfg.http_proxy {
+                let local_addr =
+                    crate::gateway::proxy::http_proxy_portal::resolve_local_addr(
+                        proxy_cfg.http_proxy_portal,
+                    );
+                let portal = std::sync::Arc::new(
+                    crate::gateway::proxy::http_proxy_portal::HttpProxyPortal::new(
+                        upstream,
+                        local_addr,
+                        data_plane_runtime.clone(),
+                    ),
+                );
+                tokio::spawn(async move {
+                    match portal.start().await {
+                        Ok(port) => {
+                            tracing::info!(port, %upstream, "http proxy portal listening")
+                        }
+                        Err(e) => tracing::warn!(?e, "failed to start http proxy portal"),
+                    }
+                });
+            }
+        }
         #[cfg(feature = "proxy-smoltcp-stack")]
         let socks5_adapter = Socks5GatewayAdapter::new(
             runtime_config.clone(),

@@ -55,22 +55,23 @@ pub struct ProxyRuntimeConfig {
     pub force_smoltcp: bool,
     pub icmp_failure_is_fatal: bool,
     pub udp_response_ipv4_mtu: usize,
-    /// Optional HTTP/HTTPS proxy address. When set, TCP traffic to ports
-    /// 80 and 443 is forwarded through this proxy instead of connecting
-    /// directly to the destination.  For port 443 the connector sends an
-    /// HTTP CONNECT request; for port 80 the client's HTTP request is
-    /// forwarded as-is.
+    /// Optional upstream HTTP/HTTPS proxy address used by the on-device HTTP
+    /// proxy portal. When set, the core starts a local HTTP proxy (see
+    /// `http_proxy_portal`) and tunnels the phone's HTTP/HTTPS traffic
+    /// through this upstream proxy via HTTP CONNECT. The upstream is reached
+    /// through the VPN data plane, so it may be a VPN-internal node.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub http_proxy: Option<SocketAddr>,
+    /// Local listen address for the on-device HTTP proxy portal. Apps (or the
+    /// Android VPN `setHttpProxy`) connect here. Defaults to `127.0.0.1:7890`
+    /// when unset.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub http_proxy_portal: Option<SocketAddr>,
 }
 
 impl ProxyRuntimeConfig {
     pub fn should_start(self, has_proxy_networks: bool) -> bool {
-        if !has_proxy_networks
-            && !self.enable_exit_node
-            && !self.no_tun
-            && self.http_proxy.is_none()
-        {
+        if !has_proxy_networks && !self.enable_exit_node && !self.no_tun {
             return false;
         }
 
@@ -88,6 +89,7 @@ impl Default for ProxyRuntimeConfig {
             icmp_failure_is_fatal: false,
             udp_response_ipv4_mtu: 1280,
             http_proxy: None,
+            http_proxy_portal: None,
         }
     }
 }
