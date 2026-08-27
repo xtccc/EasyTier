@@ -313,6 +313,14 @@ impl NetworkConfigExt for NetworkConfig {
             ));
         }
 
+        if let Some(ref http_proxy) = self.http_proxy {
+            if !http_proxy.is_empty() {
+                if let Ok(addr) = http_proxy.parse::<std::net::SocketAddr>() {
+                    cfg.set_http_proxy(Some(addr));
+                }
+            }
+        }
+
         if !self.mapped_listeners.is_empty() {
             let mapped_listeners = parse_mapped_listener_urls(&self.mapped_listeners)?;
             cfg.set_mapped_listeners(Some(mapped_listeners));
@@ -630,6 +638,10 @@ impl NetworkConfigExt for NetworkConfig {
         if let Some(socks5_portal) = config.get_socks5_portal() {
             result.enable_socks5 = Some(true);
             result.socks5_port = socks5_portal.port().map(|p| p as i32);
+        }
+
+        if let Some(http_proxy) = config.get_http_proxy() {
+            result.http_proxy = Some(http_proxy.to_string());
         }
 
         let mapped_listeners = config.get_mapped_listeners();

@@ -508,6 +508,17 @@ function removeVpnPortalClient(index: number) {
               <div class="flex flex-row gap-x-9 flex-wrap w-full">
                 <div class="flex flex-col gap-2 grow p-fluid">
                   <div class="flex">
+                    <label for="http_proxy">{{ t('http_proxy') }}</label>
+                    <span class="pi pi-question-circle ml-2 self-center" v-tooltip="t('http_proxy_help')"></span>
+                  </div>
+                  <InputText id="http_proxy" v-model="curNetwork.http_proxy"
+                    :placeholder="t('http_proxy_placeholder')" class="w-full" />
+                </div>
+              </div>
+
+              <div class="flex flex-row gap-x-9 flex-wrap w-full">
+                <div class="flex flex-col gap-2 grow p-fluid">
+                  <div class="flex">
                     <label for="mapped_listeners">{{ t('mapped_listeners') }}</label>
                     <span class="pi pi-question-circle ml-2 self-center" v-tooltip="t('mapped_listeners_help')"></span>
                   </div>

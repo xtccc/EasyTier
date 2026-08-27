@@ -224,6 +224,9 @@ socks5_help: |
 
 exit_nodes: Exit Nodes
 exit_nodes_help: Exit nodes to forward all traffic to, a virtual ipv4 address, priority is determined by the order of the list
+http_proxy: HTTP Proxy
+http_proxy_help: Optional HTTP/HTTPS proxy address. When set, TCP traffic to ports 80 and 443 is forwarded through this proxy (e.g. 10.144.144.3:8080)
+http_proxy_placeholder: "e.g. 10.144.144.3:8080"
 
 port_forwards: Port Forward
 port_forwards_help: "forward local port to remote port in virtual network. e.g.: udp://0.0.0.0:12345/10.126.126.1:23456, means forward local udp port 12345 to 10.126.126.1:23456 in the virtual network. can specify multiple."

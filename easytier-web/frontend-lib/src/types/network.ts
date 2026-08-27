@@ -140,6 +140,7 @@ export function DEFAULT_NETWORK_CONFIG(): NetworkConfig {
     enable_manual_routes: false,
     routes: [],
     exit_nodes: [],
+    http_proxy: '',
     enable_socks5: false,
     socks5_port: 1080,
     mtu: null,

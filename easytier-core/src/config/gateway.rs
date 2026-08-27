@@ -55,11 +55,22 @@ pub struct ProxyRuntimeConfig {
     pub force_smoltcp: bool,
     pub icmp_failure_is_fatal: bool,
     pub udp_response_ipv4_mtu: usize,
+    /// Optional HTTP/HTTPS proxy address. When set, TCP traffic to ports
+    /// 80 and 443 is forwarded through this proxy instead of connecting
+    /// directly to the destination.  For port 443 the connector sends an
+    /// HTTP CONNECT request; for port 80 the client's HTTP request is
+    /// forwarded as-is.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub http_proxy: Option<SocketAddr>,
 }
 
 impl ProxyRuntimeConfig {
     pub fn should_start(self, has_proxy_networks: bool) -> bool {
-        if !has_proxy_networks && !self.enable_exit_node && !self.no_tun {
+        if !has_proxy_networks
+            && !self.enable_exit_node
+            && !self.no_tun
+            && self.http_proxy.is_none()
+        {
             return false;
         }
 
@@ -76,6 +87,7 @@ impl Default for ProxyRuntimeConfig {
             force_smoltcp: false,
             icmp_failure_is_fatal: false,
             udp_response_ipv4_mtu: 1280,
+            http_proxy: None,
         }
     }
 }

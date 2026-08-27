@@ -313,6 +313,7 @@ impl CoreInstanceConfig {
                     && (flags.use_smoltcp || flags.no_tun || host.requires_smoltcp),
                 icmp_failure_is_fatal: host.icmp_failure_is_fatal,
                 udp_response_ipv4_mtu: 1280,
+                http_proxy: config.get_http_proxy(),
             },
             public_ipv6_auto: config.get_ipv6_public_addr_auto()
                 && (!host.ignore_unsupported_config || host.public_ipv6_provider_supported),
